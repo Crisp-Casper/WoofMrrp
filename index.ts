@@ -71,7 +71,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ChannelInactivity",
     description: "Sends a random message to a channel after a period of inactivity",
-    authors: [],
+    authors: [{ name: "Crisp_Casper", id: 509583952844029954n }],
     tags: ["Chat", "Utility"],
     settings,
 

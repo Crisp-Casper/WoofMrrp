@@ -1,8 +1,8 @@
 # Channel Inactivity
 
 A Vencord userplugin that sends one randomly selected message after a configurable
-period without new messages in a chosen channel. Its own message does not restart
-the timer; a new channel message begins the next inactivity period.
+period without messages from other users in a chosen channel. Messages sent by
+you—including its own—do not reset or trigger the timer.
 
 Copy this repository's `index.ts` into a `channelInactivity` folder under
 Vencord's `src/userplugins` directory, rebuild Vencord, then enable

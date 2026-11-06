@@ -8,7 +8,6 @@ const logger = new Logger("ChannelInactivity");
 
 let isRunning = false;
 let inactivityTimer: ReturnType<typeof setTimeout> | undefined;
-let lastAutomaticMessage: { content: string; expiresAt: number; } | undefined;
 
 function scheduleInactivityTimer() {
     if (inactivityTimer) clearTimeout(inactivityTimer);
@@ -38,7 +37,6 @@ async function sendRandomMessage(channelId: string) {
     }
 
     const content = messages[Math.floor(Math.random() * messages.length)];
-    lastAutomaticMessage = { content, expiresAt: Date.now() + 30_000 };
 
     try {
         await sendMessage(channelId, { content });
@@ -57,7 +55,7 @@ const settings = definePluginSettings({
     },
     inactivityMinutes: {
         type: OptionType.SLIDER,
-        description: "Minutes without a new message before sending",
+        description: "Minutes without a message from another user before sending",
         markers: makeRange(1, 20),
         default: 5,
         onChange: scheduleInactivityTimer
@@ -86,7 +84,6 @@ export default definePlugin({
         isRunning = false;
         if (inactivityTimer) clearTimeout(inactivityTimer);
         inactivityTimer = undefined;
-        lastAutomaticMessage = undefined;
     },
 
     flux: {
@@ -94,20 +91,14 @@ export default definePlugin({
             message: {
                 channel_id: string;
                 author: { id: string; };
-                content: string;
             };
         }) {
             const channelId = settings.store.channelId.trim();
-            if (message.channel_id !== channelId) return;
+            if (
+                message.channel_id !== channelId
+                || message.author.id === UserStore.getCurrentUser().id
+            ) return;
 
-            const isOurAutomaticMessage =
-                message.author.id === UserStore.getCurrentUser().id
-                && message.content === lastAutomaticMessage?.content
-                && Date.now() <= (lastAutomaticMessage?.expiresAt ?? 0);
-
-            if (isOurAutomaticMessage) return;
-
-            lastAutomaticMessage = undefined;
             scheduleInactivityTimer();
         }
     }

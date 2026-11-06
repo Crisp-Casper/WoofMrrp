@@ -92,16 +92,17 @@ export default definePlugin({
     },
 
     flux: {
-        MESSAGE_CREATE({ message }: {
+        MESSAGE_CREATE({ message, optimistic }: {
             message: {
                 channel_id: string;
                 author: { id: string; };
             };
+            optimistic?: boolean;
         }) {
             const channelId = settings.store.channelId.trim();
             if (message.channel_id !== channelId) return;
 
-            if (message.author.id === UserStore.getCurrentUser().id) {
+            if (optimistic || message.author.id === UserStore.getCurrentUser().id) {
                 stopInactivityTimer();
                 return;
             }

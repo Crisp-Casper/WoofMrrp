@@ -1,10 +1,10 @@
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { UserStore } from "@webpack/common";
 
-const logger = new Logger("ChannelInactivity");
+const logger = new Logger("WoofMrrp");
 
 let isRunning = false;
 let inactivityTimer: ReturnType<typeof setTimeout> | undefined;
@@ -68,8 +68,10 @@ const settings = definePluginSettings({
     }
 });
 
+migratePluginSettings("WoofMrrp", "ChannelInactivity");
+
 export default definePlugin({
-    name: "ChannelInactivity",
+    name: "WoofMrrp",
     description: "Sends a random message to a channel after a period of inactivity",
     authors: [{ name: "Crisp_Casper", id: 509583952844029954n }],
     tags: ["Chat", "Utility"],

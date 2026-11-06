@@ -10,8 +10,7 @@ let isRunning = false;
 let inactivityTimer: ReturnType<typeof setTimeout> | undefined;
 
 function scheduleInactivityTimer() {
-    if (inactivityTimer) clearTimeout(inactivityTimer);
-    inactivityTimer = undefined;
+    stopInactivityTimer();
 
     if (!isRunning) return;
 
@@ -22,6 +21,11 @@ function scheduleInactivityTimer() {
         inactivityTimer = undefined;
         void sendRandomMessage(channelId);
     }, settings.store.inactivityMinutes * 60_000);
+}
+
+function stopInactivityTimer() {
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    inactivityTimer = undefined;
 }
 
 async function sendRandomMessage(channelId: string) {
@@ -84,8 +88,7 @@ export default definePlugin({
 
     stop() {
         isRunning = false;
-        if (inactivityTimer) clearTimeout(inactivityTimer);
-        inactivityTimer = undefined;
+        stopInactivityTimer();
     },
 
     flux: {
@@ -96,10 +99,12 @@ export default definePlugin({
             };
         }) {
             const channelId = settings.store.channelId.trim();
-            if (
-                message.channel_id !== channelId
-                || message.author.id === UserStore.getCurrentUser().id
-            ) return;
+            if (message.channel_id !== channelId) return;
+
+            if (message.author.id === UserStore.getCurrentUser().id) {
+                stopInactivityTimer();
+                return;
+            }
 
             scheduleInactivityTimer();
         }
